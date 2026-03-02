@@ -18,6 +18,7 @@ namespace Editor
       std::string searchFilter{};
       std::string renamePath{};
       std::string deletePath{};
+      char renameBuffer[256];
 
     public:
       void draw();

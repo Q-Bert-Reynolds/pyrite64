@@ -201,6 +201,38 @@ void Editor::AssetsBrowser::draw() {
     currentWidth += itemWidth;
   };
 
+  auto drawRename = [&](const std::string &label, const ImVec2 &startPos) {
+    ImVec2 rectMin{startPos.x,                startPos.y + imageSize + 8};
+    ImVec2 rectMax{startPos.x + imageSize + 14, startPos.y + imageSize + 8 + 16};
+
+    ImVec2 originalCursor = ImGui::GetCursorPos();
+    ImGui::SetCursorScreenPos(rectMin);
+    ImGui::SetNextItemWidth(rectMax.x - rectMin.x);
+    if (ImGui::IsWindowAppearing() || !ImGui::IsAnyItemActive()) ImGui::SetKeyboardFocusHere();
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 0));
+    if (ImGui::InputText("##renameInput", renameBuffer, sizeof(renameBuffer), ImGuiInputTextFlags_EnterReturnsTrue)) {
+      fs::path oldPath = renamePath;
+      std::string newFileName = std::string(renameBuffer) + oldPath.extension().string();
+      fs::path newPath = oldPath.parent_path() / newFileName;
+
+      std::error_code ec;
+      if (oldPath != newPath) {
+        if (!fs::exists(newPath)) fs::rename(oldPath, newPath, ec);
+        else Utils::Logger::log("A file with that name already exists.", Utils::Logger::LEVEL_ERROR);
+      }
+
+      if (ec) Utils::Logger::log("Rename failed: " + ec.message(), Utils::Logger::LEVEL_ERROR);
+      renamePath.clear();
+    }
+    ImGui::PopStyleVar();
+
+    if ((!ImGui::IsItemHovered() && ImGui::IsMouseClicked(0)) || ImGui::IsKeyPressed(ImGuiKey_Escape)) {
+      renamePath.clear();
+    }
+
+    ImGui::SetCursorPos(originalCursor);
+  };
+
   auto drawLabel = [&](const std::string &label, const ImVec2 &startPos) {
     auto size = ImGui::CalcTextSize(label.c_str());
     ImVec2 rextMin{startPos.x,                startPos.y + imageSize + 8};
@@ -223,7 +255,7 @@ void Editor::AssetsBrowser::draw() {
     }
   };
 
-  auto drawGridButton = [&](const char* id, ImTextureRef icon, const char* iconTxt,
+  auto drawGridButton = [&](const std::string &path, ImTextureRef icon, const char* iconTxt,
     const std::string &label, bool selected, float alpha) {
     bool clicked = false;
     if(selected) {
@@ -231,9 +263,11 @@ void Editor::AssetsBrowser::draw() {
       ImGui::PushStyleColor(ImGuiCol_ButtonHovered, {0.5f,0.5f,0.7f,0.8f});
     }
 
-    ImGui::PushID(id);
+    ImGui::PushID(path.c_str());
     auto sPos = ImGui::GetCursorScreenPos();
-    drawLabel(label, sPos);
+    bool isRenaming = path == renamePath;
+    if (isRenaming) drawRename(label, sPos);
+    else drawLabel(label, sPos);
 
     if(icon._TexID)
     {
@@ -244,14 +278,14 @@ void Editor::AssetsBrowser::draw() {
 
     } else {
       ImGui::PushFont(nullptr, 40.0f);
-        clicked = ImGui::Button(iconTxt, textBtnSize);
+      clicked = ImGui::Button(iconTxt, textBtnSize);
       ImGui::PopFont();
     }
 
     ImGui::PopID();
 
     if(selected)ImGui::PopStyleColor(2);
-    return clicked;
+    return clicked && !isRenaming;
   };
 
   std::vector<std::string> folders{};
@@ -336,7 +370,7 @@ void Editor::AssetsBrowser::draw() {
 
       // Show a filled folder when it contains assets for this tab, outlined (empty) folder otherwise
       const char* folderIcon = folderHasAssets[folder] ? ICON_MDI_FOLDER : ICON_MDI_FOLDER_OUTLINE;
-      if (drawGridButton(folder.c_str(), ImTextureRef(nullptr), folderIcon, folder, false, 1.0f)) {
+      if (drawGridButton(folder, ImTextureRef(nullptr), folderIcon, folder, false, 1.0f)) {
         dirState = joinDir(dirState, folder);
       }
       if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
@@ -376,7 +410,7 @@ void Editor::AssetsBrowser::draw() {
 
     bool isSelected = (ctx.selAssetUUID == asset.getUUID());
     bool clicked = drawGridButton(
-      asset.name.c_str(),
+      asset.path,
       icon,
       iconTxt,
       asset.name,
@@ -533,15 +567,18 @@ void Editor::AssetsBrowser::showContextMenu(const std::string& path) {
   }
 
   if(ImGui::MenuItem(ICON_MDI_OPEN_IN_NEW " Open")) {
-    SDL_SetClipboardText(path.c_str());
+    SDL_OpenURL(path.c_str());
   }
   
   if(ImGui::MenuItem(ICON_MDI_CONTENT_COPY " Copy Path")) {
-    SDL_OpenURL(path.c_str());
+    SDL_SetClipboardText(path.c_str());
   }
   
   if(ImGui::MenuItem(ICON_MDI_RENAME " Rename")) {
     renamePath = path;
+    std::string stem = fs::path(path).stem().string(); 
+    strncpy(renameBuffer, stem.c_str(), sizeof(renameBuffer) - 1);
+    renameBuffer[sizeof(renameBuffer) - 1] = '\0';
   }
   
   if(ImGui::MenuItem(ICON_MDI_DELETE " Delete")) {
@@ -550,7 +587,6 @@ void Editor::AssetsBrowser::showContextMenu(const std::string& path) {
 }
 
 void Editor::AssetsBrowser::showInFileBrowser(const std::string& path) {
-  Utils::Logger::log(path);//DELETE ME
 #if defined(_WIN32)
   const char* args[] = {
     "explorer.exe",
