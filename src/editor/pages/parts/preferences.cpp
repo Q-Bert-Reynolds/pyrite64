@@ -21,9 +21,22 @@ bool Editor::Preferences::draw()
       ctx.applyKeymapPreset();
     }
     ImTable::end();
+
+    Editor::Input::Keymap defaults = ctx.getCurrentKeymapPreset();
+    if (ImGui::TreeNodeEx("Global", ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
+      ImTable::start("Global");
+      ImTable::addKeybind("Save",          ctx.keymap.save,         defaults.save);
+      ImTable::addKeybind("Copy",          ctx.keymap.copy,         defaults.copy);
+      ImTable::addKeybind("Paste",         ctx.keymap.paste,        defaults.paste);
+      ImTable::addKeybind("Toggle VSync",  ctx.keymap.toggleVSync,  defaults.toggleVSync);
+      ImTable::addKeybind("Reload Assets", ctx.keymap.reloadAssets, defaults.reloadAssets);
+      ImTable::addKeybind("Build",         ctx.keymap.build,        defaults.build);
+      ImTable::addKeybind("Build & Run",   ctx.keymap.buildAndRun,  defaults.buildAndRun);
+      ImTable::end();
+      ImGui::TreePop();
+    }
     if (ImGui::TreeNodeEx("3D View", ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
       ImTable::start("3D View");
-      Editor::Input::Keymap defaults = ctx.getCurrentKeymapPreset();
       ImTable::addKeybind("Move Forward",    ctx.keymap.moveForward,    defaults.moveForward);
       ImTable::addKeybind("Move Back",       ctx.keymap.moveBack,       defaults.moveBack);
       ImTable::addKeybind("Move Left",       ctx.keymap.moveLeft,       defaults.moveLeft);

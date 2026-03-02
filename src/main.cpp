@@ -310,41 +310,6 @@ int main(int argc, char** argv)
         // @TODO: refactor into generic actions with keybinds
         if (event.type == SDL_EVENT_KEY_DOWN)
         {
-          if(!ImGui::GetIO().WantTextInput)
-          {
-            if ((event.key.mod & SDL_KMOD_CTRL) && event.key.key == SDLK_C) {
-              Editor::Actions::call(Editor::Actions::Type::COPY);
-            }
-            if ((event.key.mod & SDL_KMOD_CTRL) && event.key.key == SDLK_V) {
-              Editor::Actions::call(Editor::Actions::Type::PASTE);
-            }
-            if ((event.key.mod & SDL_KMOD_CTRL) && event.key.key == SDLK_S) {
-              if (ctx.project) {
-                ctx.project->save();
-                ctx.editorScene->save();
-              }
-            }
-          }
-
-          if (!(event.key.mod & SDL_KMOD_CTRL) && event.key.key == SDLK_F11) {
-            Editor::Actions::call(Editor::Actions::Type::PROJECT_BUILD);
-          }
-
-          if (!(event.key.mod & SDL_KMOD_CTRL) && event.key.key == SDLK_F12) {
-            Editor::Actions::call(Editor::Actions::Type::PROJECT_BUILD, "run");
-          }
-
-          if (!(event.key.mod & SDL_KMOD_CTRL) && event.key.key == SDLK_F5) {
-            Editor::Actions::call(Editor::Actions::Type::ASSETS_RELOAD);
-          }
-
-          if (!(event.key.mod & SDL_KMOD_CTRL) && event.key.key == SDLK_F2)
-          {
-            presentMode = (presentMode == SDL_GPU_PRESENTMODE_VSYNC) ? SDL_GPU_PRESENTMODE_IMMEDIATE : SDL_GPU_PRESENTMODE_VSYNC;
-            printf("Switched Present Mode to: %s\n", (presentMode == SDL_GPU_PRESENTMODE_VSYNC) ? "VSync" : "Immediate");
-            SDL_SetGPUSwapchainParameters(ctx.gpu, window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, presentMode);
-          }
-
           // Fallback for environments that don't emit SDL_EVENT_TEXT_INPUT (e.g., some WSL setups).
           if (useTextInputFallback && ImGui::GetIO().WantTextInput) {
             SDL_Keymod modstate = (SDL_Keymod)SDL_GetModState();
@@ -359,6 +324,42 @@ int main(int argc, char** argv)
         }
         // Check: io.WantCaptureMouse, io.WantCaptureKeyboard
       }
+
+      if(!ImGui::GetIO().WantTextInput)
+      {
+        if (ImGui::IsKeyChordPressed(ctx.keymap.copy)) {
+          Editor::Actions::call(Editor::Actions::Type::COPY);
+        }
+        if (ImGui::IsKeyChordPressed(ctx.keymap.paste)) {
+          Editor::Actions::call(Editor::Actions::Type::PASTE);
+        }
+        if (ImGui::IsKeyChordPressed(ctx.keymap.save)) {
+          if (ctx.project) {
+            ctx.project->save();
+            ctx.editorScene->save();
+          }
+        }
+      }
+
+      if (ImGui::IsKeyChordPressed(ctx.keymap.build)) {
+        Editor::Actions::call(Editor::Actions::Type::PROJECT_BUILD);
+      }
+
+      if (ImGui::IsKeyChordPressed(ctx.keymap.buildAndRun)) {
+        Editor::Actions::call(Editor::Actions::Type::PROJECT_BUILD, "run");
+      }
+
+      if (ImGui::IsKeyChordPressed(ctx.keymap.reloadAssets)) {
+        Editor::Actions::call(Editor::Actions::Type::ASSETS_RELOAD);
+      }
+
+      if (ImGui::IsKeyChordPressed(ctx.keymap.toggleVSync))
+      {
+        presentMode = (presentMode == SDL_GPU_PRESENTMODE_VSYNC) ? SDL_GPU_PRESENTMODE_IMMEDIATE : SDL_GPU_PRESENTMODE_VSYNC;
+        printf("Switched Present Mode to: %s\n", (presentMode == SDL_GPU_PRESENTMODE_VSYNC) ? "VSync" : "Immediate");
+        SDL_SetGPUSwapchainParameters(ctx.gpu, window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, presentMode);
+      }
+
       uint64_t timeTotal = SDL_GetTicksNS();
 
       Utils::FilePicker::poll();
