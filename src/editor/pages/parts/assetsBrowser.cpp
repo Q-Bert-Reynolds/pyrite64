@@ -367,12 +367,19 @@ void Editor::AssetsBrowser::draw() {
         continue;
       }
       checkLineBreak();
+      std::string folderPath = (basePathAbs / dirState / folder).string();
 
       // Show a filled folder when it contains assets for this tab, outlined (empty) folder otherwise
       const char* folderIcon = folderHasAssets[folder] ? ICON_MDI_FOLDER : ICON_MDI_FOLDER_OUTLINE;
-      if (drawGridButton(folder, ImTextureRef(nullptr), folderIcon, folder, false, 1.0f)) {
+      if (drawGridButton(folderPath, ImTextureRef(nullptr), folderIcon, folder, false, 1.0f)) {
         dirState = joinDir(dirState, folder);
       }
+
+      if(ImGui::BeginPopupContextItem(folder.c_str())) {
+        showContextMenu(folderPath);
+        ImGui::EndPopup();
+      }
+
       if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
         ImGui::SetTooltip("Folder: %s", joinDir(dirState, folder).c_str());
       }
