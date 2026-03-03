@@ -37,6 +37,7 @@
 #include <cctype>
 
 #include "editor/undoRedo.h"
+#include "editor/actions.h"
 
 Context ctx{};
 constinit SDL_GPUSampler *texSamplerRepeat{nullptr};
@@ -297,9 +298,11 @@ int main(int argc, char** argv)
         }
 
         if(event.type == SDL_EVENT_WINDOW_MOVED || event.type == SDL_EVENT_WINDOW_RESIZED
-          || event.type == SDL_EVENT_WINDOW_RESTORED || event.type == SDL_EVENT_WINDOW_SHOWN)
-        {
+          || event.type == SDL_EVENT_WINDOW_RESTORED || event.type == SDL_EVENT_WINDOW_SHOWN) {
           editorWindow.trackGeometry();
+        } else if (event.type == SDL_EVENT_DROP_FILE) {
+          std::string droppedPath = event.drop.data;
+          if (droppedPath.ends_with(".p64proj"))Editor::Actions::call(Editor::Actions::Type::PROJECT_OPEN, droppedPath);
         }
 
         // @TODO: refactor into generic actions with keybinds

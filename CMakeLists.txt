@@ -331,6 +331,11 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         DESTINATION share/applications
         RENAME "${PYRITE_APP_NAME}.desktop")
 
+    # Install the desktop entry file to the appropriate location to get integration with desktop environment launcher such as KDE Application Launcher
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/mimetype.xml"
+        DESTINATION share/mime/packages
+        RENAME "${PYRITE_APP_NAME}.xml")
+
     # Install the icon to the appropriate location for the desktop entry file to find it
     install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/data/img/windowIcon.png"
         DESTINATION share/icons/hicolor/256x256/apps
