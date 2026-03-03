@@ -608,6 +608,7 @@ void Editor::AssetsBrowser::showInFileBrowser(const std::string& path) {
     NULL
   };
 #else
+  std::string pathArg = std::format("array:string:file:///{}", path);
   const char* args[] = {
     "dbus-send",
     "--session",
@@ -615,8 +616,8 @@ void Editor::AssetsBrowser::showInFileBrowser(const std::string& path) {
     "--type=method_call",
     "/org/freedesktop/FileManager1",
     "org.freedesktop.FileManager1.ShowItems",
-    ("array:string:\"file://" + path + "\"").c_str(),
-    "string:\"\"",
+    pathArg.c_str(),
+    "string:",
     NULL
   };
 #endif
