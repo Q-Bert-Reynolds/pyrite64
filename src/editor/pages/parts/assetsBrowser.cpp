@@ -217,11 +217,18 @@ void Editor::AssetsBrowser::draw() {
 
       std::error_code ec;
       if (oldPath != newPath) {
-        if (!fs::exists(newPath)) fs::rename(oldPath, newPath, ec);
-        else Utils::Logger::log("A file with that name already exists.", Utils::Logger::LEVEL_ERROR);
+        if (fs::exists(newPath)) Utils::Logger::log("A file with that name already exists.", Utils::Logger::LEVEL_ERROR);
+        else {
+          fs::rename(oldPath, newPath, ec);
+          if (ec) Utils::Logger::log("Rename failed: " + ec.message(), Utils::Logger::LEVEL_ERROR);
+          else {
+            fs::path oldConf = oldPath.string() + ".conf";
+            fs::path newConf = newPath.string() + ".conf";
+            fs::rename(oldConf, newConf, ec);
+            if (ec) Utils::Logger::log("Failed to move .conf: " + ec.message(), Utils::Logger::LEVEL_ERROR);
+          }
+        }
       }
-
-      if (ec) Utils::Logger::log("Rename failed: " + ec.message(), Utils::Logger::LEVEL_ERROR);
       renamePath.clear();
     }
     ImGui::PopStyleVar();
