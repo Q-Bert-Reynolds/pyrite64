@@ -318,8 +318,32 @@ void Editor::ObjectInspector::draw() {
   if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
     if (ImTable::start("Transform", obj.get())) {
       ImTable::addObjProp("Pos", srcObj->pos);
-      ImTable::addObjProp("Scale", srcObj->scale);
+
+      glm::vec3 scaleBefore = srcObj->scale.value;
+      if (ImTable::addObjProp("Scale", srcObj->scale)) 
+      {
+        if (srcObj->linkedScale) 
+        {
+          float ratio = 1.0f;
+          if (scaleBefore.x != 0)      ratio = srcObj->scale.value.x / scaleBefore.x;
+          else if (scaleBefore.y != 0) ratio = srcObj->scale.value.y / scaleBefore.y;
+          else if (scaleBefore.z != 0) ratio = srcObj->scale.value.z / scaleBefore.z;
+
+          srcObj->scale.value = scaleBefore * ratio;
+        }
+      }
+
       ImTable::addObjProp("Rot", srcObj->rot);
+
+
+      // Added because after rot for now
+      ImGui::TableNextRow();
+      ImGui::TableSetColumnIndex(0);
+      ImGui::Text("");
+      //
+
+      // Added here because cant find a way to add it in the same row as the scale
+      ImTable::addCheckBox("Link Scale", srcObj->linkedScale);      
       ImTable::end();
     }
   }
