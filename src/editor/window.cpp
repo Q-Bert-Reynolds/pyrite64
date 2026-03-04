@@ -41,7 +41,7 @@ namespace Editor {
 
   std::string Window::getConfigPath() {
     auto path = Utils::Proc::getAppDataPath() / "editor.json";
-    return path;
+    return path.string();
   }
 
   bool Window::loadState() {
