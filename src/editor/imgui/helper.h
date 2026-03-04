@@ -15,6 +15,7 @@
 #include "glm/gtc/quaternion.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include <functional>
+#include <format>
 
 namespace TPL
 {
@@ -164,13 +165,19 @@ namespace ImTable
     const std::string &getName() const { return name; }
   };
 
-  inline bool start(const char *name, Project::Object *nextObj = nullptr, float width = -1)
+  inline bool start(const char *name, Project::Object *nextObj = nullptr, float width = -1, int numColumns = 2, int flagOtherColumns = ImGuiTableColumnFlags_WidthFixed)
   {
     obj = nullptr;
-    if (!ImGui::BeginTable(name, 2))return false;
+    if (!ImGui::BeginTable(name, numColumns))return false;
     obj = nextObj;
     ImGui::TableSetupColumn("Label", ImGuiTableColumnFlags_WidthFixed);
     ImGui::TableSetupColumn("Input", ImGuiTableColumnFlags_WidthStretch);
+    
+    // Setting up other columns if need more
+    for (int i = 2; i < numColumns; i++)
+    {
+      ImGui::TableSetupColumn(std::format("Other_{}",i).c_str(), ImGuiTableColumnFlags_WidthFixed);
+    }
 
     ImGui::TableNextRow();
     ImGui::TableSetColumnIndex(1);
