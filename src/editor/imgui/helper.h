@@ -176,7 +176,7 @@ namespace ImTable
     // Setting up other columns if need more
     for (int i = 2; i < numColumns; i++)
     {
-      ImGui::TableSetupColumn(std::format("Other_{}",i).c_str(), ImGuiTableColumnFlags_WidthFixed);
+      ImGui::TableSetupColumn(std::format("Other_{}",i).c_str(), flagOtherColumns);
     }
 
     ImGui::TableNextRow();
