@@ -274,6 +274,7 @@ int main(int argc, char** argv)
 
     // Main loop
     bool done = false;
+    float lastPinch;
     while(!done) {
 
       auto frameStart = SDL_GetTicksNS();
@@ -281,6 +282,19 @@ int main(int argc, char** argv)
       SDL_Event event;
       while (SDL_PollEvent(&event))
       {
+        //convert pinch events to whole number mouse wheel events to mimic windows 
+        if (event.type == SDL_EVENT_PINCH_BEGIN) {
+          lastPinch = 1;
+        } else if (event.type == SDL_EVENT_PINCH_UPDATE) {
+
+          float y = event.pinch.scale - lastPinch;
+          if (y > 0) y = 1;
+          else if (y < 0) y = -1;
+          lastPinch = event.pinch.scale;
+          io.AddMouseSourceEvent(ImGuiMouseSource_Mouse);
+          io.AddMouseWheelEvent(0, y);
+        }
+
         ImGui_ImplSDL3_ProcessEvent(&event);
 
         bool closeRequested = event.type == SDL_EVENT_QUIT;

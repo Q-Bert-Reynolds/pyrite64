@@ -15,6 +15,16 @@
 
 bool Editor::Preferences::draw()
 {
+  if (ImGui::CollapsingHeader("Navigation", ImGuiTreeNodeFlags_DefaultOpen)) {
+    ImTable::start("Navigation");
+    ImTable::add("Zoom Speed", ctx.zoomSpeed);
+    ImTable::add("WASD Move Speed", ctx.moveSpeed);
+    ImTable::add("Pan Speed", ctx.panSpeed);
+    ImTable::add("Look Speed", ctx.lookSpeed);
+    ImTable::add("Invert Wheel Y", ctx.invertWheelY);
+    ImTable::end();
+  }
+
   if (ImGui::CollapsingHeader("Keymap", ImGuiTreeNodeFlags_DefaultOpen)) {
     ImTable::start("Keymap");
     if (ImTable::addComboBox("Preset", (int&)ctx.keymapPreset, { "Blender", "Industry Compatible" })) {
