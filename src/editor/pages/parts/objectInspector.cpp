@@ -319,20 +319,26 @@ void Editor::ObjectInspector::draw() {
     if (ImTable::start("Transform", obj.get())) {
       ImTable::addObjProp("Pos", srcObj->pos);
 
-      glm::vec3 scaleBefore = srcObj->scale.value;
-      if (ImTable::addObjProp("Scale", srcObj->scale) && srcObj->linkedScale) 
-      {
+      ImTable::addObjProp<glm::vec3>("Scale", srcObj->scale, [&](glm::vec3 *val) -> bool {
+        glm::vec3 scale = *val;
+        if (!ImGui::InputFloat3("##", glm::value_ptr(scale))) return false;
+        if (!srcObj->linkedScale) {
+          *val = scale;
+          return true;
+        }
+        glm::vec3 scaleBefore = *val;
         if (scaleBefore == glm::vec3{0,0, 0}) {
-          srcObj->scale.value = glm::vec3(srcObj->scale.value.x + srcObj->scale.value.y + srcObj->scale.value.z);
+          *val = glm::vec3(scale.x + scale.y + scale.z);
         }
         else {
           float ratio = 1.0f;
-          if      (srcObj->scale.value.x != scaleBefore.x && scaleBefore.x != 0) ratio = srcObj->scale.value.x / scaleBefore.x;
-          else if (srcObj->scale.value.y != scaleBefore.y && scaleBefore.y != 0) ratio = srcObj->scale.value.y / scaleBefore.y;
-          else if (srcObj->scale.value.z != scaleBefore.z && scaleBefore.z != 0) ratio = srcObj->scale.value.z / scaleBefore.z;
-          srcObj->scale.value = scaleBefore * ratio;
+          if      (scale.x != scaleBefore.x && scaleBefore.x != 0) ratio = scale.x / scaleBefore.x;
+          else if (scale.y != scaleBefore.y && scaleBefore.y != 0) ratio = scale.y / scaleBefore.y;
+          else if (scale.z != scaleBefore.z && scaleBefore.z != 0) ratio = scale.z / scaleBefore.z;
+          *val = scaleBefore * ratio;
         }
-      }
+        return true;
+      }, nullptr);
 
       // Linked Scale button
       ImGui::TableSetColumnIndex(0);
