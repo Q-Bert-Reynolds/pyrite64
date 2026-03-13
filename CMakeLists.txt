@@ -356,3 +356,8 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         DESTINATION share/icons/hicolor/256x256/apps
         RENAME "${PYRITE_APP_NAME}.png")
 endif()
+
+# Install rules for Windows
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    set_target_properties(pyrite64 PROPERTIES WIN32_EXECUTABLE $<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>>)
+endif()
