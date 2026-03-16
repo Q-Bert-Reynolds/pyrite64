@@ -437,6 +437,7 @@ void Editor::AssetsBrowser::draw() {
     bool isDblClick = ImGui::IsMouseDoubleClicked(0) && ImGui::IsItemHovered();
 
     if (clicked) {
+      ctx.selUUID = asset.getUUID();
       ctx.selAssetUUID = asset.getUUID();
       ImGui::makeTabVisible("Asset");
     }
