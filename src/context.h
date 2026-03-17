@@ -55,6 +55,7 @@ struct Context
   uint64_t timeCpuTotal{};
 
   // Editor state
+  uint64_t selUUID{0};
   uint64_t selAssetUUID{0};
   uint32_t selObjectUUID{0}; // The "primary" selected object (for single selection or the most recently selected in multi-selection)
   std::vector<uint32_t> selObjectUUIDs{}; // All selected object UUIDs (for multi-selection, includes selObjectUUID as the last element)
@@ -74,6 +75,7 @@ struct Context
 
   void clearObjectSelection()
   {
+    selUUID = 0;
     selObjectUUID = 0;
     selObjectUUIDs.clear();
   }
@@ -84,6 +86,7 @@ struct Context
     if (uuid != 0) {
       selObjectUUIDs.push_back(uuid);
       selObjectUUID = uuid;
+      selUUID = uuid;
       return;
     }
     selObjectUUID = 0;
@@ -93,6 +96,7 @@ struct Context
   {
     selObjectUUIDs = uuids;
     selObjectUUID = primaryUUID;
+    selUUID = primaryUUID;
     if (!isObjectSelected(selObjectUUID)) {
       selObjectUUID = selObjectUUIDs.empty() ? 0 : selObjectUUIDs.back();
     }

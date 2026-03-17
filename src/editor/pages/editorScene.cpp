@@ -114,8 +114,7 @@ void Editor::Scene::draw()
     ImGui::DockBuilderDockWindow("Layers", dockLeftID);
 
     // Right
-    ImGui::DockBuilderDockWindow("Asset", dockRightID);
-    ImGui::DockBuilderDockWindow("Object", dockRightID);
+    ImGui::DockBuilderDockWindow("Selection", dockRightID);
     ImGui::DockBuilderDockWindow("Model", dockRightID);
 
     // Bottom
@@ -194,12 +193,9 @@ void Editor::Scene::draw()
     }
   }
 
-  ImGui::Begin("Object");
-    objectInspector.draw();
-  ImGui::End();
-
-  ImGui::Begin("Asset");
-    assetInspector.draw();
+  ImGui::Begin("Selection");
+    if (ctx.isObjectSelected(ctx.selUUID)) objectInspector.draw();
+    else assetInspector.draw();
   ImGui::End();
 
   ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2_px, 2_px));
