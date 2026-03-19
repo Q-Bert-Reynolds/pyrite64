@@ -110,6 +110,10 @@ namespace Editor::UndoRedo
       if (undoStack.back()->state == newEntry->state
           && undoStack.back()->selection == newEntry->selection) {
         return;
+      } else if (undoStack.back()->description == newEntry->description
+                 && undoStack.back()->selection == newEntry->selection) {
+        undoStack.back()->state = newEntry->state;
+        return;
       }
     }
 
